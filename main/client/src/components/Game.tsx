@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-const WIDTH = 800;
-const HEIGHT = 800;
+const WIDTH = 650;
+const HEIGHT = 650;
 const DECIMAL_MULTIPLIER = 10000;
 const ballRadius = 7;
 const obstacleRadius = 4;
@@ -85,7 +85,7 @@ const GameCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [balls, setBalls] = useState<Ball[]>([]);
 
-  const obstacles: Obstacle[] = Array.from({ length: 16 }, (_, row) => {
+  const obstacles: Obstacle[] = Array.from({ length: 12 }, (_, row) => {
     return Array.from({ length: row + 1 }, (_, col) => {
       const y = 0 + row * 35;
       const spacing = 36;
@@ -104,20 +104,21 @@ const GameCanvas = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const update = () => {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
-      ctx.fillStyle = "white";
+      ctx.fillStyle = '#0d0d0d'; // Darker Background Color
       obstacles.forEach((obs) => {
         ctx.beginPath();
         ctx.arc(unpad(obs.x), unpad(obs.y), obs.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#00ff88'; // Neon Green for obstacles
         ctx.fill();
         ctx.closePath();
       });
 
-      ctx.fillStyle = "green";
+      ctx.fillStyle = '#00bfff'; // Lighter Blue for sinks
       sinks.forEach((sink) =>
         ctx.fillRect(sink.x, sink.y - sink.height / 2, sink.width - obstacleRadius * 2, sink.height)
       );
@@ -133,44 +134,17 @@ const GameCanvas = () => {
   }, [balls]);
 
   const addBall = () => {
-    setBalls((prev) => [...prev, new Ball(pad(WIDTH / 2 + 13), pad(50), ballRadius, "red")]);
+    setBalls((prev) => [...prev, new Ball(pad(WIDTH / 2 + 13), pad(50), ballRadius, '#ff6347')]);
   };
 
   return (
     <div className="game-container">
-      <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="game-canvas"></canvas>
-      <button className="add-ball" onClick={addBall}>
-        Add Ball
-      </button>
-      <style>{`
-        .game-container {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100vh;
-          background: radial-gradient(circle, #1e1e1e, #000);
-        }
-        .game-canvas {
-          border: 2px solid white;
-          background-color: black;
-        }
-        .add-ball {
-          margin-top: 10px;
-          padding: 10px 20px;
-          background: linear-gradient(45deg, #ff5733, #ffbd69);
-          border: none;
-          border-radius: 5px;
-          color: white;
-          font-size: 16px;
-          cursor: pointer;
-          transition: 0.3s;
-        }
-        .add-ball:hover {
-          transform: scale(1.1);
-        }
-      `}</style>
+      <div className="canvas-wrapper">
+        <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="game-canvas"></canvas>
+        <button className="add-ball-button" onClick={addBall}>
+          Add Ball
+        </button>
+      </div>
     </div>
   );
 };
