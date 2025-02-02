@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { registerUser } from "../firebase/authService";
-
+import { useNavigate } from "react-router-dom";
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleRegister = async () => {
     if (email && password) {
       await registerUser(email, password);
+      navigate("/login");
     } else {
       console.log("Please enter email and password");
     }

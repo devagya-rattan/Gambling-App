@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { loginUser, signInWithGoogle, logoutUser } from "../firebase/authService";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleLogin = async () => {
     if (email && password) {
       await loginUser(email, password);
+      navigate("/home");
     } else {
       console.log("Please enter email and password");
     }
@@ -15,6 +17,8 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     await signInWithGoogle();
+    navigate("/home");
+
   };
 
   return (
