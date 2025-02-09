@@ -39,6 +39,13 @@ const Home = () => {
                 alt="Card Image"
               />
             </Link>
+            <Link to="/maze">
+              <img
+                style={{ width: "300px", height: "500px", objectFit: "cover" }}
+                src="https://previews.123rf.com/images/dimajarm/dimajarm1710/dimajarm171000024/88771180-logo-labyrinth-modern-vector-symbol-maze-isometric-cube-icon-for-logotype-game-quest-corporate.jpg"
+                alt="Card Image"
+              />
+            </Link>
           </div>
         </div>
       </div>

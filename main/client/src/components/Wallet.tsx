@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";// Import the CSS file
 
 const Wallet: React.FC = () => {
   const [balance, setBalance] = useState<number>(() => {
@@ -15,8 +15,10 @@ const Wallet: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      <h2>Wallet Balance: ${balance.toFixed(2)}</h2>
+    <div className="wallet-container">
+      <div className="wallet-content">
+        <h2>Wallet Balance: ${balance.toFixed(2)}</h2>
+      </div>
     </div>
   );
 };

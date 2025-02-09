@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+
 const WIDTH = 650;
 const HEIGHT = 650;
 const DECIMAL_MULTIPLIER = 10000;
@@ -35,12 +36,12 @@ class Ball {
   vy: number;
   hasLanded: boolean;
 
-  constructor(x: number, y: number, radius: number, color: string) {
+  constructor(x: number, y: number, radius: number, color: string, vx: number = 0) {
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
-    this.vx = 0;
+    this.vx = vx; // Random horizontal movement
     this.vy = 0;
     this.hasLanded = false;
   }
@@ -168,9 +169,10 @@ const GameCanvas = () => {
   }, [balls, balance]);
 
   const addBall = () => {
+    const randomVelocity = (Math.random() - 0.5) * pad(0.4); // Small random horizontal push
     setBalls((prev) => [
       ...prev,
-      new Ball(pad(WIDTH / 2 + 13), pad(50), ballRadius, "#ff6347"),
+      new Ball(pad(WIDTH / 2 + 13), pad(50), ballRadius, "#ff6347", randomVelocity),
     ]);
   };
 

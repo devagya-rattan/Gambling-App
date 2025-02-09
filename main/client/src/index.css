@@ -247,3 +247,26 @@ body {
     transform: scale(1.05);
     box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
   }
+  /* Assuming you have a CSS file named Wallet.css */
+.wallet-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  background-color: #f4f4f9; /* Light background color */
+}
+
+.wallet-content {
+  text-align: center;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-content h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #333;
+}

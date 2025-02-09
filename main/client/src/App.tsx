@@ -5,7 +5,7 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import Game from "./components/Game";
 import Wallet from "./components/Wallet";
-
+import BouncingMaze from "./components/BouncingMaze";
 function App() {
   return (
     <BalanceProvider>
@@ -15,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/game" element={<Game />} />
+          <Route path="/maze" element={<BouncingMaze />} />
           <Route path="/wallet" element={<Wallet />} />
         </Routes>
       </BrowserRouter>
