@@ -1,5 +1,6 @@
-name: Deploy React App to EC2
+name: Push-to-EC2 instance
 
+# Trigger deployment only on push to main branch 
 on:
   push:
     branches:
@@ -7,54 +8,38 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2
+    name: Push to EC2
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v1
 
-      - name: Deploy to EC2
+      - name: Deploy to my EC2 instance
         uses: easingthemes/ssh-deploy@v2.1.5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           SOURCE: "./"
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: "/home/ubuntu/main"
+          TARGET: ${{ secrets.TARGET_DIR }}
 
-      - name: SSH into EC2 and Deploy
+      - name: Executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Ensure system is updated
-            sudo apt update -y
-
-            # Install Node.js & NPM (if missing)
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-            sudo apt install -y nodejs
-
-            # Navigate to the React project directory
+            sudo apt -y update
+            sudo apt install -y httpd
+            sudo systemctl start httpd
+            sudo systemctl enable httpd
             cd /home/ubuntu/main/client
-
-            # Install dependencies
+            sudo yum install nodejs npm -y
             npm install
-
-            # Build React app
-            npm run build
+            sudo npm run build
             cd build
-            # Clear existing Nginx HTML directory
-            sudo rm -rf /var/www/html/*
-
-            # Copy the React build files to /var/www/html
-            sudo cp -r build/* /var/www/html
-
-            # Set proper permissions
-            sudo chown -R www-data:www-data /var/www/html
-            sudo chmod -R 755 /var/www/html
-
-            # Restart Nginx to apply changes
-            sudo systemctl restart nginx
+            sudo mv * /var/www/html
+            sudo systemctl restart httpd
+            
