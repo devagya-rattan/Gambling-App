@@ -45,7 +45,7 @@ jobs:
 
             # Build React app
             npm run build
-
+            cd build
             # Clear existing Nginx HTML directory
             sudo rm -rf /var/www/html/*
 
