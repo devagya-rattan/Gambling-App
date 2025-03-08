@@ -1,6 +1,6 @@
 name: Push-to-EC2 instance
 
-# Trigger deployment only on push to main branch 
+# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v1
 
-      - name: Deploy to my EC2 instance
+      - name: Deploy to EC2 instance
         uses: easingthemes/ssh-deploy@v2.1.5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -24,22 +24,35 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
 
-      - name: Executing remote ssh commands using ssh key
+      - name: Executing remote SSH commands using SSH key
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Update package lists and install required packages
             sudo apt -y update
-            sudo apt install -y httpd
-            sudo systemctl start httpd
-            sudo systemctl enable httpd
-            cd /home/ubuntu/main/client
-            sudo yum install nodejs npm -y
+            sudo apt install -y nginx nodejs npm
+
+            # Start and enable Nginx
+            sudo systemctl start nginx
+            sudo systemctl enable nginx
+
+            # Navigate to the correct directory
+            cd ${{ secrets.TARGET_DIR }}/main/client
+
+            # Install dependencies
             npm install
-            sudo npm run build
-            cd build
-            sudo mv * /var/www/html
-            sudo systemctl restart httpd
-            
+
+            # Build the React app
+            npm run build
+
+            # Clear existing web files
+            sudo rm -rf /var/www/html/*
+
+            # Move the built files to the Nginx web directory
+            sudo cp -r build/* /var/www/html
+
+            # Restart Nginx to apply changes
+            sudo systemctl restart nginx
