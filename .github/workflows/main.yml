@@ -1,40 +1,58 @@
-name: Deploy React App
+name: Push-to-EC2 instance
 
+# Trigger deployment only on push to main branch
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
-  build:
-    runs-on: self-hosted
+  deploy:
+    name: Push to EC2
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout the code
+        uses: actions/checkout@v1
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Deploy to EC2 instance
+        uses: easingthemes/ssh-deploy@v2.1.5
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
+
+      - name: Executing remote SSH commands using SSH key
+        uses: appleboy/ssh-action@master
         with:
-          node-version: "20"
-          cache: "npm"
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Update package lists and install required packages
+            sudo apt -y update
+            sudo apt install -y nginx nodejs npm
 
-      - name: Install dependencies
-        run: |
-          cd main
-          cd client  # Navigate to the correct directory
-          npm install
+            # Start and enable Nginx
+            sudo systemctl start nginx
+            sudo systemctl enable nginx
 
-      - name: Build React app
-        run: |
-          cd main
-          cd client
-          npm run build
+            # Navigate to the correct directory
+            cd ${{ secrets.TARGET_DIR }}/main/client
 
-      - name: Clear existing files in /var/www/html
-        run: sudo rm -rf /var/www/html/*
+            # Install dependencies
+            npm install
 
-      - name: Copy build files to deployment folder
-        run: sudo cp -r main/client/build/* /var/www/html
+            # Build the React app
+            npm run build
 
-      - name: Restart web server (Optional)
-        run: sudo systemctl restart nginx  # Change to Apache if needed
+            # Clear existing web files
+            sudo rm -rf /var/www/html/*
+
+            # Move the built files to the Nginx web directory
+            sudo cp -r build/* /var/www/html
+
+            # Restart Nginx to apply changes
+            sudo systemctl restart nginx
