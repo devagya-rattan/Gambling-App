@@ -1,6 +1,5 @@
-name: Push-to-EC2 instance
+name: Deploy React App to EC2
 
-# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -8,51 +7,54 @@ on:
 
 jobs:
   deploy:
-    name: Push to EC2
+    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
-      - name: Deploy to EC2 instance
+      - name: Deploy to EC2
         uses: easingthemes/ssh-deploy@v2.1.5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           SOURCE: "./"
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.TARGET_DIR }}
+          TARGET: "/home/ubuntu/main"
 
-      - name: Executing remote SSH commands using SSH key
+      - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Update package lists and install required packages
-            sudo apt -y update
-            sudo apt install -y nginx nodejs npm
+            # Ensure system is updated
+            sudo apt update -y
 
-            # Start and enable Nginx
-            sudo systemctl start nginx
-            sudo systemctl enable nginx
+            # Install Node.js & NPM (if missing)
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt install -y nodejs
 
-            # Navigate to the correct directory
-            cd ${{ secrets.TARGET_DIR }}/main/client
+            # Navigate to the React project directory
+            cd /home/ubuntu/main/client
 
             # Install dependencies
             npm install
 
-            # Build the React app
+            # Build React app
             npm run build
 
-            # Clear existing web files
+            # Clear existing Nginx HTML directory
             sudo rm -rf /var/www/html/*
 
-            # Move the built files to the Nginx web directory
+            # Copy the React build files to /var/www/html
             sudo cp -r build/* /var/www/html
+
+            # Set proper permissions
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
 
             # Restart Nginx to apply changes
             sudo systemctl restart nginx
