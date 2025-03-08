@@ -1,0 +1,8 @@
+services:
+  website:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    command: npm start
+    ports:
+      - "5173:5173"
