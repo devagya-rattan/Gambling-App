@@ -1,0 +1,40 @@
+name: Deploy React App
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          cd main
+          cd client  # Navigate to the correct directory
+          npm install
+
+      - name: Build React app
+        run: |
+          cd main
+          cd client
+          npm run build
+
+      - name: Clear existing files in /var/www/html
+        run: sudo rm -rf /var/www/html/*
+
+      - name: Copy build files to deployment folder
+        run: sudo cp -r main/client/build/* /var/www/html
+
+      - name: Restart web server (Optional)
+        run: sudo systemctl restart nginx  # Change to Apache if needed
